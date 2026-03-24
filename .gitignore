@@ -1,0 +1,21 @@
+# IDE
+.vscode/
+
+# Build folders
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Arduino compiled files
+*.hex
+*.elf
+*.bin
+*.map
+*.o
+*.a
+
+# Videos (recommended not to upload)
+*.mp4
+*.mov
