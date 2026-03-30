@@ -1,22 +1,79 @@
-// Button + LED example using a pull‑down resistor on D2
+const int buttonPin = 2;
+const int ledPin = 8;
 
-// Pressing the button (5 V → D2) turns the LED ON.
-// Releasing it (D2 pulled down to GND) turns the LED OFF.
+int lastMode = -1;
+int currentState = LOW;
+int lastState = LOW;
+int mode = 0;
+unsigned long previousMillis = 0;
+unsigned long lastDebounceTime = 0;
+const unsigned long debounceDelay = 50;
+bool ledState = LOW;
 
-const int ledPin    = 8;  // LED on digital pin 8
-const int buttonPin = 2;   // Button on digital pin 2
+int lastReading = LOW;
 
 void setup() {
-  pinMode(ledPin, OUTPUT);   // set LED pin as output
-  pinMode(buttonPin, INPUT); // D2 reads voltage from button node
+  pinMode(buttonPin, INPUT);
+  Serial.begin(9600);
+  pinMode(ledPin, OUTPUT);
 }
 
 void loop() {
-  int buttonState = digitalRead(buttonPin); // 0 = released, 1 = pressed
 
-  if (buttonState == HIGH) {
-    digitalWrite(ledPin, HIGH); // LED on
-  } else {
-    digitalWrite(ledPin, LOW);  // LED off
+  int reading = digitalRead(buttonPin);
+
+  if (reading != lastReading) {
+    lastDebounceTime = millis();
   }
+
+  if ((millis() - lastDebounceTime) > debounceDelay) {
+
+    if (reading != currentState) {
+      currentState = reading;
+
+      if (currentState == HIGH) {
+        mode++;
+
+        if (mode > 3) {
+          mode = 0;
+        }
+
+        Serial.println(mode);
+      }
+    }
+  }
+
+  lastReading = reading;
+  handleLedMode();
 }
+void handleLedMode(){
+  if (mode != lastMode) {
+    previousMillis = millis();
+    ledState = LOW;
+    digitalWrite(ledPin, LOW);
+    lastMode = mode ;
+      }
+  switch (mode) {
+    case 0:
+    	digitalWrite(ledPin, LOW);
+    	break;
+    case 1:
+    	digitalWrite(ledPin, HIGH);
+    	break;
+    case 2:
+    	blinkLed(1000);
+    	break;
+    case 3:
+    	blinkLed(200);
+    	break;
+    }
+  }
+void blinkLed(unsigned long interval) {
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    ledState = !ledState;
+    digitalWrite(ledPin, ledState);
+    }
+  }
+    
